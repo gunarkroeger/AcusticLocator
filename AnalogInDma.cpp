@@ -10,9 +10,9 @@ AnalogInDma::~AnalogInDma()
 }
 bool AnalogInDma::init()
 {
+	MX_DMA_Init();
 	if(!MX_ADC1_Init())
 		return false;
-	MX_DMA_Init();
 	return true;
 }
 
@@ -32,7 +32,7 @@ bool AnalogInDma::MX_ADC1_Init()
 	/**Common config 
 	*/
 	hadc1.Instance = ADC1;
-	hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV64;
+	hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
 	hadc1.Init.Resolution = ADC_RESOLUTION_12B;
 	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
@@ -58,9 +58,9 @@ bool AnalogInDma::MX_ADC1_Init()
 
 	/**Configure Regular Channel 
 	*/
-	sConfig.Channel = ADC_CHANNEL_1;
+	sConfig.Channel = ADC_CHANNEL_5;
 	sConfig.Rank = 1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+	sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
 	sConfig.SingleDiff = ADC_SINGLE_ENDED;
 	sConfig.OffsetNumber = ADC_OFFSET_NONE;
 	sConfig.Offset = 0;
@@ -69,17 +69,20 @@ bool AnalogInDma::MX_ADC1_Init()
 
 	/**Configure Regular Channel 
 	*/
+	sConfig.Channel = ADC_CHANNEL_6;
 	sConfig.Rank = 2;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 		return false;
 
 	/**Configure Regular Channel 
 	*/
+	sConfig.Channel = ADC_CHANNEL_9;
 	sConfig.Rank = 3;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 		return false;
 	/**Configure Regular Channel 
 	*/
+	sConfig.Channel = ADC_CHANNEL_15;
 	sConfig.Rank = 4;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 		return false;
