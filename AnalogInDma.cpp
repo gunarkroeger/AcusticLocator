@@ -60,7 +60,7 @@ bool AnalogInDma::MX_ADC1_Init()
 	*/
 	sConfig.Channel = ADC_CHANNEL_5;
 	sConfig.Rank = 1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
+	sConfig.SamplingTime = ADC_SAMPLETIME_247CYCLES_5;
 	sConfig.SingleDiff = ADC_SINGLE_ENDED;
 	sConfig.OffsetNumber = ADC_OFFSET_NONE;
 	sConfig.Offset = 0;

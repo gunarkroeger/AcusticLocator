@@ -5,34 +5,49 @@
 #include <queue>
 //------------------------------------------------------------------------------
 enum { ADC_LENGTH = 4 };
-enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH };
+enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH * 256};
 enum { ADC_MEAN_SIZE = 1024 };
+enum { THREASHOLD = 100 };
 //------------------------------------------------------------------------------
 enum { SERIAL_BUF_LENGTH = 1024 };
 
+//------------------------------------------------------------------------------
+typedef struct Signal {
+	float& operator[](unsigned i) { return channel[i]; }
+	float channel[ADC_LENGTH];
+} Signal;
+//------------------------------------------------------------------------------
 DigitalOut led1(LED1);
+
 DigitalOut adcFlag(D2);
+DigitalOut processFlag(D3);
+
 Serial pc(USBTX, USBRX);
-
-Timer timer;
-
-DMA_HandleTypeDef hdma_adc1;
 
 AnalogIn a0(A0);
 AnalogIn a1(A1);
 AnalogIn a2(A2);
 AnalogIn a3(A3);
+//------------------------------------------------------------------------------
+Timer timer;
+
+//------------------------------------------------------------------------------
+DMA_HandleTypeDef hdma_adc1;
+
 AnalogInDma adc;
 
 uint32_t adcBuffer[ADC_ACQ_LENGHT];
 queue<char> serialQueue;
+queue<Signal> processQueue;
 
 int a = 0, b = 0;
-unsigned adcTime = 0;
-float adcValue[ADC_LENGTH];
-float adcMeanValue[ADC_LENGTH];
-float adcUnbiasedValue[ADC_LENGTH];
-std::vector<int> test;
+
+float adcTime = 0;
+unsigned stayActive = 0;
+
+Signal adcValue;
+Signal adcMeanValue;
+Signal adcUnbiasedValue;
 
 void serialInterruptTx()
 {
@@ -46,16 +61,39 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 {
     /* Prevent unused argument(s) compilation warning */
     UNUSED(AdcHandle);
-	adcTime = timer.read_us();
-	timer.reset();
-	led1 = adcFlag;
-	for(unsigned i = 0; i < ADC_LENGTH; i++)
-	{
-		adcValue[i] = adcBuffer[offset+i];
-		adcMeanValue[i] += (adcValue[i]-adcMeanValue[i]) / ADC_MEAN_SIZE;
-		adcUnbiasedValue[i] = adcValue[i] - adcMeanValue[i];
-	}
 	adcFlag = 1;
+	
+	adcTime = float(timer.read_us()) * 2 * ADC_LENGTH / ADC_ACQ_LENGHT;
+	timer.reset();
+	if(processQueue.size() < 512)
+	{
+		led1 = 0;
+		for(unsigned i = 0; i < length; i+= ADC_LENGTH)
+		{
+			for(unsigned ch = 0; ch < ADC_LENGTH; ch++)
+			{
+				adcValue[ch] = adcBuffer[offset+ch+i];
+				adcMeanValue[ch] += (adcValue[ch]-adcMeanValue[ch]) / ADC_MEAN_SIZE;
+				adcUnbiasedValue[ch] = adcValue[ch] - adcMeanValue[ch];		
+			}
+			
+			bool greaterThanThr = false;
+			for(unsigned ch = 0; ch < ADC_LENGTH; ch++)
+				if(adcUnbiasedValue[ch] > THREASHOLD)
+					greaterThanThr = true;
+			
+			if(greaterThanThr)
+				stayActive = 50;
+			
+			if(stayActive)
+			{
+				processQueue.push(adcUnbiasedValue);
+				stayActive--;
+			}
+		}
+	}
+	else led1 = 1;
+	adcFlag = 0;
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -86,43 +124,33 @@ int main()
 	if(!adc.start(adcBuffer, ADC_ACQ_LENGHT))
 		_Error_Handler(__FILE__, __LINE__);
 	
-	
-	wait(2);
 	char line[20];
-    while (true) {
-    	if(adcFlag)
+    while (true)
+	{
+		a++;
+		if(processQueue.size())
 		{
-			a++;
-			if(adcUnbiasedValue[0] > 100 || adcUnbiasedValue[1] > 100)
-				a = 0;
-			if(a<100)
-			{
-				snprintf(line, sizeof(line),"%i,%i\r\n", int(adcUnbiasedValue[0]), int(adcUnbiasedValue[1]));
-				for(unsigned i = 0; i < sizeof(line) && line[i] != '\0'; i++)
-					serialQueue.push(line[i]);
-			}
-			if(a == 100)
-			{
-    			NVIC_DisableIRQ(DMA1_Channel1_IRQn);
-				
-				while (serialQueue.size()) {
-					if(pc.writable())
-					{
-						pc.putc(serialQueue.front());
-						serialQueue.pop();
-					}
-				}
-				
-				adcFlag = 0;
-    			NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-			}
+			processFlag = 1;
 			
-			adcFlag = 0;
+			Signal signal = processQueue.front();
+			processQueue.pop();
+		
+			snprintf(line, sizeof(line),"%i,%i\r\n", int(signal[0]), int(signal[1]));
+			for(unsigned i = 0; i < sizeof(line) && line[i] != '\0'; i++)
+				serialQueue.push(line[i]);
+			
+			while (serialQueue.size()) {
+				if(pc.writable())
+				{
+					pc.putc(serialQueue.front());
+					serialQueue.pop();
+				}
+			}
+			processFlag = 0;
 		}
-		/*ad = a0.read_u16();
-		ad = a1.read_u16();
-		ad = a2.read_u16();
-		ad = a3.read_u16();*/
+
+	//NVIC_DisableIRQ(DMA1_Channel1_IRQn);
+	//NVIC_EnableIRQ(DMA1_Channel1_IRQn);
     }
 }
 
