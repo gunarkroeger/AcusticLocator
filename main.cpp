@@ -5,7 +5,8 @@
 #include <queue>
 //------------------------------------------------------------------------------
 enum { ADC_LENGTH = 4 };
-enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH * 256};
+enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH * 1};
+enum { CAPUTURE_LENGTH = 512}; //6.64ms
 enum { ADC_MEAN_SIZE = 1024 };
 enum { THREASHOLD = 100 };
 //------------------------------------------------------------------------------
@@ -45,6 +46,8 @@ int a = 0, b = 0;
 float adcTime = 0;
 unsigned stayActive = 0;
 
+volatile bool captureReady = false;
+
 Signal adcValue;
 Signal adcMeanValue;
 Signal adcUnbiasedValue;
@@ -62,10 +65,9 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
     /* Prevent unused argument(s) compilation warning */
     UNUSED(AdcHandle);
 	adcFlag = 1;
-	
 	adcTime = float(timer.read_us()) * 2 * ADC_LENGTH / ADC_ACQ_LENGHT;
 	timer.reset();
-	if(processQueue.size() < 512)
+	if(processQueue.size() < CAPUTURE_LENGTH)
 	{
 		led1 = 0;
 		for(unsigned i = 0; i < length; i+= ADC_LENGTH)
@@ -83,16 +85,18 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 					greaterThanThr = true;
 			
 			if(greaterThanThr)
-				stayActive = 50;
+				stayActive = true;
 			
 			if(stayActive)
 			{
 				processQueue.push(adcUnbiasedValue);
-				stayActive--;
 			}
 		}
 	}
-	else led1 = 1;
+	else {
+		captureReady = true;
+		stayActive = false;
+	}
 	adcFlag = 0;
 }
 
@@ -128,13 +132,20 @@ int main()
     while (true)
 	{
 		a++;
-		if(processQueue.size())
+		while(!captureReady); //wait for full capture
+		
+		NVIC_DisableIRQ(DMA1_Channel1_IRQn);
+		
+		while(processQueue.size()) //process captured signal
 		{
 			processFlag = 1;
 			
+			//get sample
 			Signal signal = processQueue.front();
 			processQueue.pop();
-		
+			//analyse data
+			
+			//serial debug sample
 			snprintf(line, sizeof(line),"%i,%i\r\n", int(signal[0]), int(signal[1]));
 			for(unsigned i = 0; i < sizeof(line) && line[i] != '\0'; i++)
 				serialQueue.push(line[i]);
@@ -148,9 +159,8 @@ int main()
 			}
 			processFlag = 0;
 		}
-
-	//NVIC_DisableIRQ(DMA1_Channel1_IRQn);
-	//NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+		adcFlag = 0;
+		NVIC_EnableIRQ(DMA1_Channel1_IRQn);
     }
 }
 
