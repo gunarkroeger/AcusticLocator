@@ -1,22 +1,21 @@
 #include "mbed.h"
 #include "main.h"
 #include "AnalogInDma.h"
+#include "Crosscorrel.h"
+#include "Definitions.h"
 #include <vector>
 #include <queue>
 //------------------------------------------------------------------------------
-enum { ADC_LENGTH = 4 };
 enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH * 1};
 enum { CAPUTURE_LENGTH = 512}; //6.64ms
 enum { ADC_MEAN_SIZE = 1024 };
 enum { THREASHOLD = 100 };
+enum { TAU = 100 };
 //------------------------------------------------------------------------------
 enum { SERIAL_BUF_LENGTH = 1024 };
 
 //------------------------------------------------------------------------------
-typedef struct Signal {
-	float& operator[](unsigned i) { return channel[i]; }
-	float channel[ADC_LENGTH];
-} Signal;
+
 //------------------------------------------------------------------------------
 DigitalOut led1(LED1);
 
@@ -38,12 +37,11 @@ DMA_HandleTypeDef hdma_adc1;
 AnalogInDma adc;
 
 uint32_t adcBuffer[ADC_ACQ_LENGHT];
-queue<char> serialQueue;
-queue<Signal> processQueue;
+vector<Signal> processQueue;
 
 int a = 0, b = 0;
 
-float adcTime = 0;
+unsigned adcTime = 0;
 unsigned stayActive = 0;
 
 volatile bool captureReady = false;
@@ -52,21 +50,13 @@ Signal adcValue;
 Signal adcMeanValue;
 Signal adcUnbiasedValue;
 
-void serialInterruptTx()
-{
-	while ((pc.writeable()) && serialQueue.size()) {
-		pc.putc(serialQueue.front());
-		serialQueue.pop();
-	}
-}
-
 void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 {
     /* Prevent unused argument(s) compilation warning */
     UNUSED(AdcHandle);
 	adcFlag = 1;
-	adcTime = float(timer.read_us()) * 2 * ADC_LENGTH / ADC_ACQ_LENGHT;
-	timer.reset();
+	//adcTime = float(timer.read_us()) * 2 * ADC_LENGTH / ADC_ACQ_LENGHT;
+	//timer.reset();
 	if(processQueue.size() < CAPUTURE_LENGTH)
 	{
 		led1 = 0;
@@ -89,11 +79,14 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 			
 			if(stayActive)
 			{
-				processQueue.push(adcUnbiasedValue);
+				if(processQueue.size() == 0)
+					timer.reset();
+				processQueue.push_back(adcUnbiasedValue);
 			}
 		}
 	}
 	else {
+		adcTime = timer.read_us();
 		captureReady = true;
 		stayActive = false;
 	}
@@ -128,7 +121,8 @@ int main()
 	if(!adc.start(adcBuffer, ADC_ACQ_LENGHT))
 		_Error_Handler(__FILE__, __LINE__);
 	
-	char line[20];
+	Crosscorrel crosscorrel;
+	
     while (true)
 	{
 		a++;
@@ -136,30 +130,23 @@ int main()
 		
 		NVIC_DisableIRQ(DMA1_Channel1_IRQn);
 		
-		while(processQueue.size()) //process captured signal
+		//printf("Signals:\n");
+		for(unsigned t = 0; t < processQueue.size(); t++) //process captured signal
 		{
 			processFlag = 1;
 			
-			//get sample
-			Signal signal = processQueue.front();
-			processQueue.pop();
-			//analyse data
-			
 			//serial debug sample
-			snprintf(line, sizeof(line),"%i,%i\r\n", int(signal[0]), int(signal[1]));
-			for(unsigned i = 0; i < sizeof(line) && line[i] != '\0'; i++)
-				serialQueue.push(line[i]);
-			
-			while (serialQueue.size()) {
-				if(pc.writable())
-				{
-					pc.putc(serialQueue.front());
-					serialQueue.pop();
-				}
-			}
-			processFlag = 0;
+			pc.printf("%i,%i\n", int(processQueue[t][0]), int(processQueue[t][1]));
 		}
+		//printf("Crosscorrel:\n");
+			   
+		crosscorrel.GetMax(processQueue, 0, 1);
+			   
+		processFlag = 0;
+		
 		adcFlag = 0;
+		processQueue.clear();
+		captureReady = false;
 		NVIC_EnableIRQ(DMA1_Channel1_IRQn);
     }
 }

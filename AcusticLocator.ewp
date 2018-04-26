@@ -1151,6 +1151,15 @@
     <group>
         <name>AcusticLocator</name>
         <file>
+            <name>$PROJ_DIR$\Crosscorrel.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Crosscorrel.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Definitions.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\main.cpp</name>
         </file>
         <file>
