@@ -5,9 +5,10 @@ Crosscorrel::Crosscorrel()
 	this->tau = 50;
 }
 
-float Crosscorrel::GetMax(SignalBuf &buf, unsigned chA, unsigned chB)
+int Crosscorrel::GetDelay(SignalBuf &buf, unsigned chA, unsigned chB)
 {
 	float max = 0;
+	int delay = 0;
 	for(int j = -tau; j <= tau; j++)
 	{
 		float correl = 0;
@@ -16,10 +17,14 @@ float Crosscorrel::GetMax(SignalBuf &buf, unsigned chA, unsigned chB)
 		{
 			correl += buf[t][chA] * GetValue(buf, t+j, chB);
 		}
-		printf("%i\n", int(correl));
-		max = correl > max ? correl : max;
+		//printf("%i\n", int(correl));
+		if(correl > max)
+		{
+			max = correl;
+			delay = j;
+		}
 	}
-	return max;
+	return delay;
 }
 
 Crosscorrel::~Crosscorrel()

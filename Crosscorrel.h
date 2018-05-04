@@ -10,7 +10,7 @@ public:
     Crosscorrel();
     virtual ~Crosscorrel();
 	
-	float GetMax(SignalBuf &buf, unsigned chA, unsigned chB);
+	int GetDelay(SignalBuf &buf, unsigned chA, unsigned chB);
 
 
 protected:
