@@ -1206,6 +1206,12 @@
             <name>$PROJ_DIR$\mbed_config.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\Multilat.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Multilat.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\stm32l4xx_hal_msp.c</name>
         </file>
     </group>

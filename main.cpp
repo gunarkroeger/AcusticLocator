@@ -2,6 +2,7 @@
 #include "main.h"
 #include "AnalogInDma.h"
 #include "Crosscorrel.h"
+#include "Multilat.h"
 #include "Definitions.h"
 #include <vector>
 #include <queue>
@@ -28,6 +29,7 @@ AnalogIn a0(A0);
 AnalogIn a1(A1);
 AnalogIn a2(A2);
 AnalogIn a3(A3);
+AnalogIn a4(A4);
 //------------------------------------------------------------------------------
 Timer timer;
 
@@ -122,6 +124,7 @@ int main()
 		_Error_Handler(__FILE__, __LINE__);
 	
 	Crosscorrel crosscorrel;
+	Multilat multilat;
 	
     while (true)
 	{
@@ -138,63 +141,22 @@ int main()
 			//serial debug sample
 			pc.printf("%i,%i\n", int(processQueue[t][0]), int(processQueue[t][1]));
 		}
+				
+		Signal t = {0.0819f,0.0808f,0.1105f,0,0.0306f};
 		
-		float p[3][5] = {
-			{0,	-75,	75, 	-75,	75},
-			{0,	-75,	-75,	-75,	-75},
-			{0,	75,		75,		-75,	-75}
-		};
+		//multilat.GetPosition(t);
+					
+		t[0] = 0; //get delays in relation to channel 0
+		t[1] = crosscorrel.GetDelay(processQueue, 0, 1);
+		t[2] = crosscorrel.GetDelay(processQueue, 0, 2);
+		t[3] = crosscorrel.GetDelay(processQueue, 0, 3);
+		t[4] = crosscorrel.GetDelay(processQueue, 0, 4);
 		
-		float t[5] = {0.0819f,0.0808f,0.1105f,0,0.0306f};
-		float A[3][3];
-		float b[3];
+		for(unsigned i = 0; i < ADC_LENGTH; i++)
+			printf("crosscorrel[0,%d]: %i\n", i, int(t[i]));
 		
-		unsigned i = 0;
-		unsigned c = 3;
-		float v = 1484;
-		unsigned line = 0;
-		for(unsigned j = 1; j < 5; j++)
-		{
-			if(j == c) continue;
-			
-			for(unsigned k = 0; k < 3; k++)
-			{
-				A[line][k] = 2*(v*(t[j]-t[c])*(p[k][i]-p[k][c]) - 
-							 v*(t[i]-t[c])*(p[k][j]-p[k][c]));
-			
-			}
-			b[line]	= v*(t[i]-t[c])*(v*v*(t[j]-t[c])*(t[j]-t[c])-
-									 	(p[0][j]*p[0][j]+
-									  	p[1][j]*p[1][j]+
-										p[2][j]*p[2][j])) +
-						(v*(t[i]-t[c])-v*(t[j]-t[c]))*
-										(p[0][c]*p[0][c]+
-									  	p[1][c]*p[1][c]+
-										p[2][c]*p[2][c]) +
-						v*(t[j]-t[c])*
-							
-										((p[0][i]*p[0][i]+
-									  	p[1][i]*p[1][i]+
-										p[2][i]*p[2][i]) -
-						v*v*(t[i]-t[c])*(t[i]-t[c]));
-											
-											  
-			line++;
-		}
+		multilat.GetPosition(t);
 		
-		for(unsigned i = 0; i < 3; i++)
-			for(unsigned j = 0; j < 3; j++)
-				pc.printf("A[%d][%d] = %d\n", i, j, int(A[i][j]));
-		
-			for(unsigned j = 0; j < 3; j++)
-				pc.printf("b[%d] = %d\n", j, int(b[j]));
-			
-		printf("Crosscorrel[0,1]: %i\n", crosscorrel.GetDelay(processQueue, 0, 1));
-		printf("Crosscorrel[0,2]: %i\n", crosscorrel.GetDelay(processQueue, 0, 2));
-		printf("Crosscorrel[0,3]: %i\n", crosscorrel.GetDelay(processQueue, 0, 3));
-		printf("Crosscorrel[1,2]: %i\n", crosscorrel.GetDelay(processQueue, 1, 2));
-		printf("Crosscorrel[1,3]: %i\n", crosscorrel.GetDelay(processQueue, 1, 3));
-		printf("Crosscorrel[2,3]: %i\n", crosscorrel.GetDelay(processQueue, 2, 3));
 			   
 		processFlag = 0;
 		

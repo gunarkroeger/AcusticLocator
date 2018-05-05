@@ -39,7 +39,7 @@ bool AnalogInDma::MX_ADC1_Init()
 	hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
 	hadc1.Init.LowPowerAutoWait = DISABLE;
 	hadc1.Init.ContinuousConvMode = ENABLE;
-	hadc1.Init.NbrOfConversion = 4;
+	hadc1.Init.NbrOfConversion = 5;
 	hadc1.Init.DiscontinuousConvMode = DISABLE;
 	hadc1.Init.NbrOfDiscConversion = 1;
 	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
@@ -80,10 +80,18 @@ bool AnalogInDma::MX_ADC1_Init()
 	sConfig.Rank = 3;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 		return false;
+	
 	/**Configure Regular Channel 
 	*/
 	sConfig.Channel = ADC_CHANNEL_15;
 	sConfig.Rank = 4;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+		return false;
+
+	/**Configure Regular Channel 
+	*/
+	sConfig.Channel = ADC_CHANNEL_2;
+	sConfig.Rank = 5;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
 		return false;
 	return true;
