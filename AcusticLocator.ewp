@@ -125,11 +125,11 @@
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>OGUseCmsisDspLib</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CoreVariant</name>
@@ -1158,6 +1158,12 @@
         </file>
         <file>
             <name>$PROJ_DIR$\Definitions.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\FFT.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\FFT.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\main.cpp</name>

@@ -1197,6 +1197,12 @@
             <name>$PROJ_DIR$\Definitions.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\FFT.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\FFT.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\main.cpp</name>
         </file>
         <file>
