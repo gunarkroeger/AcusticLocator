@@ -17,7 +17,7 @@ int Crosscorrel::GetDelay(SignalBuf &buf, unsigned chA, unsigned chB)
 		{
 			correl += buf[t][chA] * GetValue(buf, t+j, chB);
 		}
-		//printf("%i\n", int(correl));
+		printf("%i\n", int(correl));
 		if(correl > max)
 		{
 			max = correl;

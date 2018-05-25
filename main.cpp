@@ -6,6 +6,7 @@
 #include "Definitions.h"
 #include <vector>
 #include <queue>
+#include "Adafruit_SSD1306.h"
 //------------------------------------------------------------------------------
 enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH * 1};
 enum { CAPUTURE_LENGTH = 512}; //6.64ms
@@ -20,6 +21,7 @@ enum { SERIAL_BUF_LENGTH = 1024 };
 //------------------------------------------------------------------------------
 DigitalOut led1(LED1);
 
+
 DigitalOut adcFlag(D2);
 DigitalOut processFlag(D3);
 
@@ -33,6 +35,19 @@ AnalogIn a4(A4);
 //------------------------------------------------------------------------------
 Timer timer;
 
+//------------------------------------------------------------------------------
+class I2CPreInit : public I2C
+{
+public:
+    I2CPreInit(PinName sda, PinName scl) : I2C(sda, scl)
+    {
+        frequency(400000);
+        start();
+    };
+};
+ 
+I2CPreInit gI2C(PB_14,PB_13);
+Adafruit_SSD1306_I2c gOled2(gI2C, NC);
 //------------------------------------------------------------------------------
 DMA_HandleTypeDef hdma_adc1;
 
@@ -110,6 +125,33 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 }
 
 
+void rodaTela(float x, float y, float z){
+		gOled2.clearDisplay();
+		gOled2.setTextCursor(64, 10);
+		gOled2.printf("x:%d", int (x*1000));
+		gOled2.setTextCursor(64, 30);
+		gOled2.printf("y:%d", int (y*1000));
+		gOled2.setTextCursor(64, 50);
+		gOled2.printf("z:%d", int (z*1000));
+        gOled2.fillCircle(32, 32, 30, 1);
+        gOled2.fillCircle(32, 32, 24, 0);
+        float div = x*x + y*y;
+        div = sqrt(div);
+        x = x/div;
+        y = y/div;
+        gOled2.drawLine(32, 32, 32 + y*30, 32 - x*30, 1);
+		
+//        gOled2.drawChar(20, 25, (uint16_t)div/10, 1, 0, 2);
+//        gOled2.drawChar(40, 25, (uint16_t)div-div/10, 1, 0, 2);
+//        if(z>0){
+//            gOled2.drawChar(85, 20, 'U', 1, 0, 4);
+//        }
+//        else if(z<0){
+//            gOled2.drawChar(85, 20, 'D', 1, 0, 4);
+//        }
+        gOled2.display();
+}
+
 // main() runs in its own thread in the OS
 int main()
 {
@@ -133,31 +175,36 @@ int main()
 		
 		NVIC_DisableIRQ(DMA1_Channel1_IRQn);
 		
+		processFlag = 1;
 		//printf("Signals:\n");
 		for(unsigned t = 0; t < processQueue.size(); t++) //process captured signal
 		{
-			processFlag = 1;
 			
 			//serial debug sample
-			pc.printf("%i,%i\n", int(processQueue[t][0]), int(processQueue[t][1]));
+			for(unsigned i = 0; i < ADC_LENGTH; i++)
+				pc.printf("%i,", int(processQueue[t][i]));
+			pc.printf("\n");
 		}
 				
-		Signal t = {0.0819f,0.0808f,0.1105f,0,0.0306f};
+		Signal t = {23 * SAMPLE_TIME,36 * SAMPLE_TIME,12 * SAMPLE_TIME,28 * SAMPLE_TIME,0 * SAMPLE_TIME};
 		
 		//multilat.GetPosition(t);
+		
 					
 		t[0] = 0; //get delays in relation to channel 0
 		t[1] = crosscorrel.GetDelay(processQueue, 0, 1);
 		t[2] = crosscorrel.GetDelay(processQueue, 0, 2);
 		t[3] = crosscorrel.GetDelay(processQueue, 0, 3);
 		t[4] = crosscorrel.GetDelay(processQueue, 0, 4);
-		
+				
 		for(unsigned i = 0; i < ADC_LENGTH; i++)
 			printf("crosscorrel[0,%d]: %i\n", i, int(t[i]));
 		
-		multilat.GetPosition(t);
+		Pos X = multilat.GetPosition(t);
 		
-			   
+		rodaTela(X[2], X[0], X[1]);
+		
+		pc.printf("\n\n");
 		processFlag = 0;
 		
 		adcFlag = 0;

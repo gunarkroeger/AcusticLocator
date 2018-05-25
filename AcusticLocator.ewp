@@ -125,11 +125,11 @@
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OGUseCmsisDspLib</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CoreVariant</name>
@@ -1151,6 +1151,21 @@
     <group>
         <name>AcusticLocator</name>
         <file>
+            <name>$PROJ_DIR$\Adafruit_GFX.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Adafruit_GFX.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Adafruit_GFX_Config.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Adafruit_SSD1306.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Adafruit_SSD1306.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\Crosscorrel.cpp</name>
         </file>
         <file>
@@ -1160,10 +1175,7 @@
             <name>$PROJ_DIR$\Definitions.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\FFT.cpp</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\FFT.h</name>
+            <name>$PROJ_DIR$\glcdfont.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\main.cpp</name>
