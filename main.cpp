@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include "Adafruit_SSD1306.h"
+#include "OLED.h"
 //------------------------------------------------------------------------------
 enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH * 1};
 enum { CAPUTURE_LENGTH = 512}; //6.64ms
@@ -22,6 +23,8 @@ enum { SERIAL_BUF_LENGTH = 1024 };
 DigitalOut led1(LED1);
 
 
+OLED oled(D14, D15, D8, D7, D9, D5, D4, D3);
+
 DigitalOut adcFlag(D2);
 DigitalOut processFlag(D3);
 
@@ -32,22 +35,12 @@ AnalogIn a1(A1);
 AnalogIn a2(A2);
 AnalogIn a3(A3);
 AnalogIn a4(A4);
+
+int threshold = THREASHOLD;
 //------------------------------------------------------------------------------
 Timer timer;
-
 //------------------------------------------------------------------------------
-class I2CPreInit : public I2C
-{
-public:
-    I2CPreInit(PinName sda, PinName scl) : I2C(sda, scl)
-    {
-        frequency(400000);
-        start();
-    };
-};
- 
-I2CPreInit gI2C(PB_14,PB_13);
-Adafruit_SSD1306_I2c gOled2(gI2C, NC);
+
 //------------------------------------------------------------------------------
 DMA_HandleTypeDef hdma_adc1;
 
@@ -66,7 +59,11 @@ volatile bool captureReady = false;
 Signal adcValue;
 Signal adcMeanValue;
 Signal adcUnbiasedValue;
- 
+
+void refreshDisp()
+{
+	oled.rodaTela();	
+}
 void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 {
     /* Prevent unused argument(s) compilation warning */
@@ -88,7 +85,7 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 			
 			bool greaterThanThr = false;
 			for(unsigned ch = 0; ch < ADC_LENGTH; ch++)
-				if(adcUnbiasedValue[ch] > THREASHOLD)
+				if(adcUnbiasedValue[ch] > threshold)
 					greaterThanThr = true;
 			
 			if(greaterThanThr)
@@ -124,34 +121,6 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 	b--;
 }
 
-
-void rodaTela(float x, float y, float z){
-		gOled2.clearDisplay();
-		gOled2.setTextCursor(64, 10);
-		gOled2.printf("x:%d", int (x*1000));
-		gOled2.setTextCursor(64, 30);
-		gOled2.printf("y:%d", int (y*1000));
-		gOled2.setTextCursor(64, 50);
-		gOled2.printf("z:%d", int (z*1000));
-        gOled2.fillCircle(32, 32, 30, 1);
-        gOled2.fillCircle(32, 32, 24, 0);
-        float div = x*x + y*y;
-        div = sqrt(div);
-        x = x/div;
-        y = y/div;
-        gOled2.drawLine(32, 32, 32 + y*30, 32 - x*30, 1);
-		
-//        gOled2.drawChar(20, 25, (uint16_t)div/10, 1, 0, 2);
-//        gOled2.drawChar(40, 25, (uint16_t)div-div/10, 1, 0, 2);
-//        if(z>0){
-//            gOled2.drawChar(85, 20, 'U', 1, 0, 4);
-//        }
-//        else if(z<0){
-//            gOled2.drawChar(85, 20, 'D', 1, 0, 4);
-//        }
-        gOled2.display();
-}
-
 // main() runs in its own thread in the OS
 int main()
 {
@@ -159,6 +128,9 @@ int main()
 	//pc.attach(&serialInterruptTx, Serial::TxIrq);
 	
 	timer.start();
+	
+//	Ticker displayTicker;
+//	displayTicker.attach(&refreshDisp, 0.1f);
 	
 	if(!adc.init())
 		_Error_Handler(__FILE__, __LINE__);
@@ -168,10 +140,21 @@ int main()
 	Crosscorrel crosscorrel;
 	Multilat multilat;
 	
+   	//.setX();
+   	//oled.setFreqPot(float freq, float pot);
+   	//oled.setC(int c);
+   	//oled.setFFT(float fftOut[128], float maxValue);
+	
+   	oled.setThreshold(threshold);
+	
     while (true)
 	{
 		a++;
-		while(!captureReady); //wait for full capture
+		while(!captureReady)
+		{
+			//wait for full capture
+			oled.rodaTela();
+		}
 		
 		NVIC_DisableIRQ(DMA1_Channel1_IRQn);
 		
@@ -196,14 +179,26 @@ int main()
 		t[2] = crosscorrel.GetDelay(processQueue, 0, 2);
 		t[3] = crosscorrel.GetDelay(processQueue, 0, 3);
 		t[4] = crosscorrel.GetDelay(processQueue, 0, 4);
-				
+		
+		int c = 0;
+		float min = 10000;
+		for(unsigned i = 0; i < ADC_LENGTH; i++) //find most negative delay
+			if(t[i] < min)
+			{
+				min = t[i];
+				c = i;
+			}	
+		
+   		oled.setC(c);
+		
 		for(unsigned i = 0; i < ADC_LENGTH; i++)
 			printf("crosscorrel[0,%d]: %i\n", i, int(t[i]));
 		
 		Pos X = multilat.GetPosition(t);
 		
-		rodaTela(X[2], X[0], X[1]);
-		
+		float Y[3] = {X[0]*1000-8, X[1]*1000+39, X[2]*1000 -85};
+		oled.setX(Y);
+		pc.printf("Threshold = %i\n", threshold);
 		pc.printf("\n\n");
 		processFlag = 0;
 		

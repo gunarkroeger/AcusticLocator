@@ -1230,6 +1230,18 @@
             <name>$PROJ_DIR$\Multilat.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\OLED.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\OLED.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\QEI.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\QEI.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\stm32l4xx_hal_msp.c</name>
         </file>
     </group>
