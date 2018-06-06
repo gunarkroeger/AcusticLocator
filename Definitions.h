@@ -6,7 +6,7 @@ enum { DIMENSIONS = 3 };
 #define SPEED_OF_SOUND 340
 #define SAMPLE_TIME 0.000013f
 
-enum { CAPTURE_LENGTH = 512}; //6.64ms/2
+enum { CAPTURE_LENGTH = 512}; //6.64ms
 
 typedef struct Signal {
 	float& operator[](unsigned i) { return channel[i]; }
@@ -20,7 +20,7 @@ typedef struct Pos {
 	float axis[DIMENSIONS];
 } Pos;
 
-#define FFT_MAX_DISPLAY 8000
+#define FFT_MAX_DISPLAY 20000
 const unsigned fftLogIndex[] = {
 0  ,
 1  ,
@@ -38,6 +38,6 @@ const unsigned fftLogIndex[] = {
 63 ,
 87 ,
 120,
-128,
+256,
 };
 #endif
