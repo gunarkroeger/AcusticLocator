@@ -1,3 +1,6 @@
+#ifndef OLED_H
+#define OLED_H
+
 #include "Adafruit_SSD1306.h"
 #include "QEI.h"
 #include "mbed.h"
@@ -24,13 +27,13 @@ public:
     void setX(float X[3]);
     void setFreqPot(float freq, float pot);
     void setC(int c);
-    void setFFT(float fftOut[128], float maxValue);
+    void setFFT(float fftOut[16], float maxValue);
     void setThreshold(int &threshold);
     
     void rodaTela(void);
     
 private:
-//------------------------------FUNÇÕES-----------------------------------------
+//------------------------------FUNCOES-----------------------------------------
     void rodaTelaMenu(void);
     void rodaTelaLocalizador(void);
     void rodaTelaThresholdEdit(void);
@@ -39,8 +42,9 @@ private:
     void rodaTelaFFT(void);
     void rodaTelaExit(void);
     void rodaTelaDebug(void);
+    void rodaTelaCreditos(void);
 
-//------------------------------VARIÁVEIS---------------------------------------
+//------------------------------VARIAVEIS---------------------------------------
 //----------------------------DO LOCALIZADOR------------------------------------
 //    typedef struct Pos {
 //        float& operator[](unsigned i) { return axis[i]; }
@@ -49,10 +53,11 @@ private:
     float X[3];
     int c;
     float freq, pot;
-    float fftOut[128], maxValue;
+    float fftOut[16], maxValue;
+    float filtro[16];
     int *threshold;
     
-//------------------------------VARIÁVEIS---------------------------------------
+//------------------------------VARIAVEIS---------------------------------------
 //------------------------------DO DISPLAY--------------------------------------
     float dist, bussx, bussy, raio, preto, branco;
     float posx[6], posy[6];
@@ -66,12 +71,13 @@ private:
     Adafruit_SSD1306_I2c gOled2;
     
 //------------------------------UTILIDADES--------------------------------------
-    enum estado{menu, localizador, thresholdEdit, bussola, FreqPot, FFT, exitTela, debug}estadoDaTela, estadoAnterior, menuSelect;
+    enum estado{menu, localizador, thresholdEdit, bussola, FreqPot, FFT, exitTela, creditos, debug}estadoDaTela, estadoAnterior, menuSelect;
     bool alteracao;
-    int optionSelect, optionSelectLocal, optionSelectThreshold;
+    int optionSelect, optionSelectLocal, optionSelectThreshold, optionSelectFFT;
     int sentido1;
     int sentido2;
     bool click;
     
 };
 
+#endif

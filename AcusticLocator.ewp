@@ -125,11 +125,11 @@
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>OGUseCmsisDspLib</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CoreVariant</name>
@@ -887,7 +887,7 @@
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>$PROJ_DIR$/mbed-os/targets/TARGET_STM/TARGET_STM32L4/TARGET_STM32L476xG/device/TOOLCHAIN_IAR/stm32l476xx.icf</state>
+                    <state>$PROJ_DIR$\mbed-os\targets\TARGET_STM\TARGET_STM32L4\TARGET_STM32L476xG\device\TOOLCHAIN_IAR\stm32l476xx.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>
@@ -1173,6 +1173,18 @@
         </file>
         <file>
             <name>$PROJ_DIR$\Definitions.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Dht11.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Dht11.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\FFT.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\FFT.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\glcdfont.h</name>

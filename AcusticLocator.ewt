@@ -1212,6 +1212,18 @@
             <name>$PROJ_DIR$\Definitions.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\Dht11.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Dht11.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\FFT.cpp</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\FFT.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\glcdfont.h</name>
         </file>
         <file>

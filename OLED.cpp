@@ -28,9 +28,12 @@ OLED::OLED( PinName sda, PinName scl,
     optionSelect = 0;
     optionSelectThreshold = 0;
     optionSelectLocal = 0;
+    optionSelectFFT = 0;
     sentido1 = 0;
     sentido2 = 0;
     click = false;
+	for(unsigned i = 0; i < 16; i++)
+		filtro[i] = 1;
 }
 
 //------------------------------------------------------------------------------
@@ -57,10 +60,11 @@ void OLED::setFreqPot(float freq, float pot){
     alteracao = true;
 }
 
-void OLED::setFFT(float fftOut[128], float maxValue){
-    for(int i = 0; i < 128; i++){
-        this->fftOut[i] = fftOut[i];    
-    }    
+//float fftOutPos[128], 
+void OLED::setFFT(float fftOut[16], float maxValue){
+    for(int i = 0; i < 16; i++){
+        this->fftOut[i] = fftOut[i];
+    }
     this->maxValue = maxValue;
     alteracao = true;
 }
@@ -112,6 +116,10 @@ void OLED::rodaTela(){
             //telaExit
                 rodaTelaExit();
                 break;
+//            case creditos:
+//            //telaCreditos
+//                rodaTelaCreditos();
+//                break;
             case debug:
             //TelaDebug
                 rodaTelaDebug();
@@ -133,7 +141,7 @@ void OLED::rodaTela(){
         else if(roda2.getPulses() < 0){
             sentido2++;
         }
-        else if(roda1.getRevolutions() != 0){
+        else if(roda1.getRevolutions() != 0/* || roda2.getRevolutions() != 0*/){
             click = !click;
         }
         else
@@ -167,7 +175,7 @@ void OLED::rodaTelaMenu(void){
     if(not(click))
         alteracao = false;
     
-    //opção Bussola
+    //opcao Bussola
     if(optionSelect == 0){
         gOled2.setTextColor(0, 1);
         gOled2.drawFastHLine(18, 19, 78, 1);
@@ -179,7 +187,7 @@ void OLED::rodaTelaMenu(void){
     gOled2.setTextCursor(18, 20);
     gOled2.printf(" Localizador ");
     
-    //opção FFT
+    //opcao FFT
     if(optionSelect == 1){
         gOled2.setTextColor(0, 1);
         gOled2.drawFastHLine(18, 35, 30, 1);
@@ -191,7 +199,7 @@ void OLED::rodaTelaMenu(void){
     gOled2.setTextCursor(18, 36);
     gOled2.printf(" FFT ");
     
-    //opção Debug
+    //opcao Debug
     if(optionSelect == 2){
         gOled2.setTextColor(0, 1);
         gOled2.drawFastHLine(18, 51, 42, 1);
@@ -203,7 +211,19 @@ void OLED::rodaTelaMenu(void){
     gOled2.setTextCursor(18, 52);
     gOled2.printf(" Debug ");
     
-    //resetar variáveis
+//    opcao Creditos
+//    if(optionSelect == 2){
+//        gOled2.setTextColor(0, 1);
+//        gOled2.drawFastHLine(18, 51, 60, 1);
+//        if(click)
+//            estadoDaTela = creditos;
+//    }
+//    else
+//        gOled2.setTextColor(1);
+//    gOled2.setTextCursor(18, 52);
+//    gOled2.printf(" Creditos ");
+    
+    //resetar variaveis
     sentido1 = 0;
     sentido2 = 0;
     click = false;
@@ -231,7 +251,7 @@ void OLED::rodaTelaLocalizador(void){
     if(not(click))
         alteracao = false;
     
-    //opção Bussola
+    //opcao Bussola
     if(optionSelectLocal == 0){
         gOled2.setTextColor(0, 1);
         gOled2.drawFastHLine(18, 19, 54, 1);
@@ -243,7 +263,7 @@ void OLED::rodaTelaLocalizador(void){
     gOled2.setTextCursor(18, 20);
     gOled2.printf(" Bussola ");
     
-    //opção Threshold
+    //opcao Threshold
     if(optionSelectLocal == 1){
         gOled2.setTextColor(0, 1);
         gOled2.drawFastHLine(18, 35, 66, 1);
@@ -255,7 +275,7 @@ void OLED::rodaTelaLocalizador(void){
     gOled2.setTextCursor(18, 36);
     gOled2.printf(" Threshold ");
     
-    //opção Exit
+    //opcao Exit
     if(optionSelectLocal == 2){
         gOled2.setTextColor(0, 1);
         gOled2.drawFastHLine(18, 51, 36, 1);
@@ -269,7 +289,7 @@ void OLED::rodaTelaLocalizador(void){
     gOled2.setTextCursor(18, 52);
     gOled2.printf(" Exit ");
     
-    //resetar variáveis
+    //resetar variaveis
     sentido1 = 0;
     sentido2 = 0;
     click = false;
@@ -293,7 +313,7 @@ void OLED::rodaTelaBussola(void){
     x0 = X[0];  //x0 --> direita
     x1 = X[1];  //x1 --> cima
     x2 = X[2];  //x2 --> frente 
-    //dist = distância eixo x2x0
+    //dist = distancia eixo x2x0
     dist = x2*x2 + x0*x0;
     dist = sqrt(dist);
     //colocando eixo x2x0 na norma
@@ -336,13 +356,13 @@ void OLED::rodaTelaBussola(void){
         swap(*ponty[3], *ponty[4]);
         swap(*pontx[3], *pontx[4]);
     }
-    //desenha círculo externo da bussola
+    //desenha circulo externo da bussola
     gOled2.fillCircle(bussx, bussy, raio, 1);
     gOled2.fillCircle(bussx, bussy, raio - 3, 0);
     //desenha a seta
     gOled2.fillTriangle(posx[0], posy[0], posx[1], posy[1], posx[2], posy[2], 0);
     gOled2.fillTriangle(posx[3], posy[3], posx[4], posy[4], posx[5], posy[5], 1);
-    //imprime distância da bússola
+    //imprime distancia da bussola
     gOled2.setTextColor(1);
     gOled2.setTextSize(1);
     gOled2.setTextCursor(68, 0);
@@ -365,7 +385,7 @@ void OLED::rodaTelaBussola(void){
     if(abs(x1)<1000)
         gOled2.printf("%dcm", abs(int (x1/10)));
     else
-		gOled2.printf("%d.%dm", int(abs(x1/1000)), abs(int(x1) % 1000) / 100);
+        gOled2.printf("%d.%dm", int(abs(x1/1000)), abs(int(x1) % 1000) / 100);
 
     gOled2.drawFastHLine(0, 55, 128, 1);
     gOled2.drawFastVLine(126, 56, 8, 1);
@@ -374,7 +394,7 @@ void OLED::rodaTelaBussola(void){
     gOled2.setTextSize(1);
     gOled2.setTextCursor(0,56);
     gOled2.printf("<-EXIT   FREQ E POT->");
-    //resetar variáveis
+    //resetar variaveis
     sentido1 = 0;
     sentido2 = 0;
     click = false;
@@ -412,9 +432,9 @@ void OLED::rodaTelaThresholdEdit(void){
             gOled2.setTextColor(1);
             gOled2.printf(" Threshold: ");
             if(sentido1 > 0)
-                *threshold = *threshold + 1;
-            else if(sentido1 < 0)
-                *threshold = *threshold - 1;
+                *threshold = *threshold + 5;
+            else if(sentido1 < 0 && *threshold > 30)
+                *threshold = *threshold - 5;
             gOled2.setTextColor(0, 1);
             gOled2.setTextSize(2);
             gOled2.printf("%d", *threshold);
@@ -443,7 +463,7 @@ void OLED::rodaTelaThresholdEdit(void){
         }
     }
     gOled2.printf(" Exit ");
-    //resetar variáveis
+    //resetar variaveis
     sentido1 = 0;
     sentido2 = 0;
 }
@@ -467,14 +487,14 @@ void OLED::rodaTelaFreqPot(void){
     gOled2.printf("Freq: ");
     if(freq < 1000){
         gOled2.setTextSize(2);
-    	gOled2.printf("%d", int(freq/1000));
+        gOled2.printf("%d", int(freq/1000));
         gOled2.setTextSize(1);
         gOled2.printf("Hz");
     }
     else{
         gOled2.setTextSize(2);
-    	gOled2.printf("%d.%d", int(freq/1000), (int(freq) % 1000) / 10);
-		
+        gOled2.printf("%d.%d", int(freq/1000), (int(freq) % 1000) / 10);
+        
         gOled2.setTextSize(1);
         gOled2.printf("kHz");
     }
@@ -493,7 +513,7 @@ void OLED::rodaTelaFreqPot(void){
     gOled2.setTextCursor(0,56);
     gOled2.setTextColor(0,1);
     gOled2.printf("<-BUSSOLA            ");
-    //resetar variáveis
+    //resetar variaveis
     sentido1 = 0;
     sentido2 = 0;
     click = false;
@@ -504,24 +524,98 @@ void OLED::rodaTelaFreqPot(void){
 void OLED::rodaTelaFFT(void){
     //lidar com o rotary
     //lidar com o click
-    //resetar variáveis
-    if(sentido1 != 0){
-        alteracao = true;
-        estadoAnterior = FFT;
-        if(sentido1 < 0)
-            estadoDaTela = exitTela;
-    }
-    else
-        alteracao = false;
+
+    float valorHeight[16], filtroHeight[16];
+    int view;
     
-    float heightMult = (64) / maxValue;
-    for(int i = 0; i < 128; i++){
-        gOled2.drawFastVLine(i, 64, -fftOut[i]*heightMult, 1);
+    if(not(click)){
+        view = 64;
+        if(sentido1 < 0){
+            alteracao = true;
+            estadoAnterior = FFT;
+            estadoDaTela = exitTela;
+        }
+        else
+            alteracao = false;
     }
-    //resetar variáveis
+    
+    if(click){
+        view = 56;
+        alteracao = true;
+        if(sentido1 > 0 && optionSelectFFT < 15)
+            optionSelectFFT++;
+        else if(sentido1 < 0 && optionSelectFFT > 0)
+            optionSelectFFT--;
+        if(sentido2 > 0 && *(filtro+optionSelectFFT) < 1)
+            *(filtro + optionSelectFFT) += 0.1;
+        else if(sentido2 < 0 && *(filtro+optionSelectFFT) > 0.05)
+            *(filtro + optionSelectFFT) -= 0.1;
+        else
+            alteracao = false;
+    }
+    
+    
+    gOled2.drawFastHLine(0, 0, 128, 1);
+    gOled2.drawFastVLine(0, 1, 8, 1);
+    gOled2.drawFastVLine(127, 1, 8, 1);
+    gOled2.setTextCursor(1, 1);
+    gOled2.setTextColor(0, 1);
+    if(click){
+        switch(optionSelectFFT){
+            case 0: gOled2.printf("150Hz       EDIT MODE"); break;
+            case 1: gOled2.printf("300Hz       EDIT MODE"); break;
+            case 2: gOled2.printf("450Hz       EDIT MODE"); break;
+            case 3: gOled2.printf("600Hz       EDIT MODE"); break;
+            case 4: gOled2.printf("900Hz       EDIT MODE"); break;
+            case 5: gOled2.printf("1.2kHz      EDIT MODE"); break;
+            case 6: gOled2.printf("1.8kHz      EDIT MODE"); break;
+            case 7: gOled2.printf("2.4kHz      EDIT MODE"); break;
+            case 8: gOled2.printf("3.0kHz      EDIT MODE"); break;
+            case 9: gOled2.printf("3.6kHz      EDIT MODE"); break;
+            case 10: gOled2.printf("4.8kHz      EDIT MODE"); break;
+            case 11: gOled2.printf("6.0kHz      EDIT MODE"); break;
+            case 12: gOled2.printf("8.4kHz      EDIT MODE"); break;
+            case 13: gOled2.printf("10.8kHz     EDIT MODE"); break;
+            case 14: gOled2.printf("15.6kHz     EDIT MODE"); break;
+            case 15: gOled2.printf("20.4kHz     EDIT MODE"); break;
+        }
+        for(int i = 0; i < 16; i++){
+            filtroHeight[i] = 64 * 0.70 * (*(filtro + i));
+            valorHeight[i] = 64 * 0.70 * fftOut[i] * (*(filtro + i)) / maxValue;
+            gOled2.drawFastVLine(i*8+3, view + 1, 8, 1);
+            if(int(valorHeight[i]) == 0)
+                valorHeight[i] = 1;
+            if(int(filtroHeight[i]) == 0)
+                filtroHeight[i] = 1;
+        }
+        for(int i = 0; i < 4; i++)
+            gOled2.drawFastHLine(0, 57+2*i, 128, 0);
+        gOled2.fillRect(optionSelectFFT*8+1, view+1, 4, 8, 1);
+    }
+    else{
+        gOled2.printf("<-EXIT      VIEW MODE");
+        for(int i = 0; i < 16; i++){
+            filtroHeight[i] = 64 * 0.80 * (*(filtro + i));
+            valorHeight[i] = 64 * 0.80 * fftOut[i] * (*(filtro + i)) / maxValue;
+            if(int(valorHeight[i]) == 0)
+                valorHeight[i] = 1;
+            if(int(filtroHeight[i]) == 0)
+                filtroHeight[i] = 1;
+        }
+    }
+
+    for(int i = 0; i < 16; i++){
+        //desenhar o valor
+        gOled2.fillRect(i*8, view-valorHeight[i], 6, valorHeight[i], 1);
+        //desenhar barra de filtro
+        gOled2.drawFastHLine(i*8, view-filtroHeight[i], 4, 1);
+        gOled2.drawFastHLine(i*8, view+1-filtroHeight[i], 6, 0);
+        gOled2.drawFastVLine(i*8, view-filtroHeight[i], filtroHeight[i], 1);
+    }
+    
+    //resetar variaveis
     sentido1 = 0;
     sentido2 = 0;
-    click = false;    
 }
 
 //------------------------------------------------------------------------------
@@ -553,7 +647,7 @@ void OLED::rodaTelaExit(void){
     gOled2.setTextColor(0,1);
     gOled2.setTextCursor(0,56);
     gOled2.printf("               BACK->");
-    //resetar variáveis
+    //resetar variaveis
     sentido1 = 0;
     sentido2 = 0;
     click = false;
@@ -579,7 +673,7 @@ void OLED::rodaTelaDebug(void){
     x0 = X[0];  //x0 --> direita
     x1 = X[1];  //x1 --> cima
     x2 = X[2];  //x2 --> frente 
-    //dist = distância eixo x2x0
+    //dist = distancia eixo x2x0
     dist = x2*x2 + x0*x0;
     dist = sqrt(dist);
     //colocando eixo x2x0 na norma
@@ -623,7 +717,7 @@ void OLED::rodaTelaDebug(void){
         swap(*ponty[3], *ponty[4]);
         swap(*pontx[3], *pontx[4]);
     }
-    //desenha círculo externo da bussola
+    //desenha circulo externo da bussola
     gOled2.fillCircle(bussx, bussyDebug, raioDebug, 1);
     gOled2.fillCircle(bussx, bussyDebug, raioDebug - 3, 0);
     //desenha a seta
@@ -640,7 +734,7 @@ void OLED::rodaTelaDebug(void){
     gOled2.printf("Z:%d", int(X[1]));
     gOled2.setTextCursor(75, 54);
     gOled2.printf("c:%d", c);
-    //facilidade de ver qual microfone é o primeiro
+    //facilidade de ver qual microfone eh o primeiro
     switch(c){
         case 0:
             gOled2.fillCircle(64, 0, 5, 1);
@@ -658,7 +752,38 @@ void OLED::rodaTelaDebug(void){
             gOled2.fillCircle(128, 0, 5, 1);
             break;
     }
-    //resetar variáveis
+    //resetar variaveis
+    sentido1 = 0;
+    sentido2 = 0;
+    click = false;
+}
+
+//------------------------------------------------------------------------------
+//---------------------------RODA TELA CREDITOS---------------------------------
+
+void OLED::rodaTelaCreditos(void){
+    //lidar com o rotary
+    if(sentido1 != 0 || click){
+        alteracao = true;
+        estadoDaTela = menuSelect;
+    }
+    else{
+        alteracao = false;
+    }
+    gOled2.setTextColor(1);
+    gOled2.setTextSize(1);
+    gOled2.setTextCursor(25, 0);
+    gOled2.printf("Carolina Dias\n");
+    gOled2.setTextCursor(25, 14);
+    gOled2.printf("Gunar Kroeger\n");
+    gOled2.setTextCursor(25, 28);
+    gOled2.printf("Oliver Penner\n");
+    gOled2.setTextCursor(25, 42);
+    gOled2.printf("Bruno S Chang\n");
+    gOled2.setTextCursor(25, 56);
+    gOled2.printf("Hermes Irineu\n");
+    
+    //resetar variaveis
     sentido1 = 0;
     sentido2 = 0;
     click = false;

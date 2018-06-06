@@ -8,14 +8,13 @@
 #include <queue>
 #include "Adafruit_SSD1306.h"
 #include "OLED.h"
+#include "FFT.h"
+
 //------------------------------------------------------------------------------
 enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH * 1};
-enum { CAPUTURE_LENGTH = 512}; //6.64ms
 enum { ADC_MEAN_SIZE = 1024 };
-enum { THREASHOLD = 100 };
-enum { TAU = 100 };
+enum { THRESHOLD = 100 };
 //------------------------------------------------------------------------------
-enum { SERIAL_BUF_LENGTH = 1024 };
 
 //------------------------------------------------------------------------------
 
@@ -24,9 +23,7 @@ DigitalOut led1(LED1);
 
 
 OLED oled(D14, D15, D8, D7, D9, D5, D4, D3);
-
-DigitalOut adcFlag(D2);
-DigitalOut processFlag(D3);
+FFT fft;
 
 Serial pc(USBTX, USBRX);
 
@@ -36,7 +33,7 @@ AnalogIn a2(A2);
 AnalogIn a3(A3);
 AnalogIn a4(A4);
 
-int threshold = THREASHOLD;
+int threshold = THRESHOLD;
 //------------------------------------------------------------------------------
 Timer timer;
 //------------------------------------------------------------------------------
@@ -62,16 +59,15 @@ Signal adcUnbiasedValue;
 
 void refreshDisp()
 {
-	oled.rodaTela();	
+	oled.rodaTela();
 }
 void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 {
     /* Prevent unused argument(s) compilation warning */
     UNUSED(AdcHandle);
-	adcFlag = 1;
 	//adcTime = float(timer.read_us()) * 2 * ADC_LENGTH / ADC_ACQ_LENGHT;
 	//timer.reset();
-	if(processQueue.size() < CAPUTURE_LENGTH)
+	if(processQueue.size() < CAPTURE_LENGTH)
 	{
 		led1 = 0;
 		for(unsigned i = 0; i < length; i+= ADC_LENGTH)
@@ -104,7 +100,6 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 		captureReady = true;
 		stayActive = false;
 	}
-	adcFlag = 0;
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -129,9 +124,6 @@ int main()
 	
 	timer.start();
 	
-//	Ticker displayTicker;
-//	displayTicker.attach(&refreshDisp, 0.1f);
-	
 	if(!adc.init())
 		_Error_Handler(__FILE__, __LINE__);
 	if(!adc.start(adcBuffer, ADC_ACQ_LENGHT))
@@ -139,11 +131,10 @@ int main()
 	
 	Crosscorrel crosscorrel;
 	Multilat multilat;
-	
+	fft.oled = &oled;
    	//.setX();
    	//oled.setFreqPot(float freq, float pot);
    	//oled.setC(int c);
-   	//oled.setFFT(float fftOut[128], float maxValue);
 	
    	oled.setThreshold(threshold);
 	
@@ -153,13 +144,13 @@ int main()
 		while(!captureReady)
 		{
 			//wait for full capture
-			oled.rodaTela();
+			refreshDisp();
+			wait(0.02f);
 		}
 		
 		NVIC_DisableIRQ(DMA1_Channel1_IRQn);
-		
-		processFlag = 1;
-		//printf("Signals:\n");
+				
+		printf("Signals:\n");
 		for(unsigned t = 0; t < processQueue.size(); t++) //process captured signal
 		{
 			
@@ -168,7 +159,9 @@ int main()
 				pc.printf("%i,", int(processQueue[t][i]));
 			pc.printf("\n");
 		}
-				
+		fft.CalculateFFT(processQueue, 0);
+    	//setFFT(float fftOut[16], float maxValue, float &filtro);
+	
 		Signal t = {23 * SAMPLE_TIME,36 * SAMPLE_TIME,12 * SAMPLE_TIME,28 * SAMPLE_TIME,0 * SAMPLE_TIME};
 		
 		//multilat.GetPosition(t);
@@ -200,12 +193,11 @@ int main()
 		oled.setX(Y);
 		pc.printf("Threshold = %i\n", threshold);
 		pc.printf("\n\n");
-		processFlag = 0;
 		
-		adcFlag = 0;
 		processQueue.clear();
 		captureReady = false;
 		NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+		refreshDisp();
     }
 }
 

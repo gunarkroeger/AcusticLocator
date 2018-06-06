@@ -1,8 +1,18 @@
 #include "Multilat.h"
 
+
+Dht11 sensor(D2);
+
 Multilat::Multilat()
 {
 	
+}
+
+float Multilat::calculateSpeedOfSound(void){
+    sensor.read();
+    int a = sensor.getCelsius();
+	printf("Temp = %i °C\n", a);
+    return 331.45 * sqrt((float(a) + 273.15)/273.15);
 }
 
 Pos Multilat::GetPosition(Signal t)
@@ -11,7 +21,8 @@ Pos Multilat::GetPosition(Signal t)
 	float b[DIMENSIONS];
 	unsigned i = 0;
 	unsigned c = 0;
-	float v = SPEED_OF_SOUND; //	m/s
+	float v = calculateSpeedOfSound();	//SPEED_OF_SOUND; //	m/s
+	printf("v = %i m/s\n", (int) v);
 	unsigned line = 0;
 	
 	

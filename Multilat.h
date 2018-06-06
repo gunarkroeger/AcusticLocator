@@ -3,7 +3,8 @@
 
 #include <vector>
 #include "Definitions.h"
- 
+#include "Dht11.h"
+
 class Multilat {
 
 public:
@@ -11,6 +12,7 @@ public:
     virtual ~Multilat();
 	
 	Pos GetPosition(Signal t);
+	float calculateSpeedOfSound(void);
 
 protected:
 	const float p[DIMENSIONS][ADC_LENGTH] = {
