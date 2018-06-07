@@ -85,7 +85,11 @@ Pos Multilat::GetPosition(Signal t)
 
 	float invdet = 1 / det;
 
-	printf("det = %i\n", int(det));
+	if(det)
+		printf("det = %i\n", int(det));
+	else
+		printf("det = ZERO\n");
+	
 	float Ainv[DIMENSIONS][DIMENSIONS]; // inverse of matrix A
 	Ainv[0][0] = (A[1][1] * A[2][2] - A[2][1] * A[1][2]) * invdet;
 	Ainv[0][1] = (A[0][2] * A[2][1] - A[0][1] * A[2][2]) * invdet;
@@ -110,6 +114,17 @@ Pos Multilat::GetPosition(Signal t)
 		
 	for(unsigned j = 0; j < DIMENSIONS; j++)
 		printf("X[%d] = %d mm\n", j, int(1000*X[j]));
+	
+	float angle2d = atan2 (X[0],X[2]) * 180 / 3.1415f;
+	printf("angle = %i\n", int(angle2d));
+	
+	
+	if(angle2d < aproxAngle2d[c]-90 || angle2d > aproxAngle2d[c]+90)
+	{
+		X[0] = -X[0];
+		X[1] = -X[1];
+		X[2] = -X[2];
+	}
 
 	return X;
 }

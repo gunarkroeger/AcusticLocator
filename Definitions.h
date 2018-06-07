@@ -40,4 +40,13 @@ const unsigned fftLogIndex[] = {
 120,
 256,
 };
+
+const float aproxAngle2d[]
+{
+0,
+-135,
+135,
+-60,
+60,
+};
 #endif
