@@ -69,6 +69,12 @@ void OLED::setFFT(float fftOut[16], float maxValue){
     alteracao = true;
 }
 
+
+float OLED::getFilter(unsigned i)
+{
+	return filtro[i];
+}
+
 void OLED::setC(int c){
     this->c = c;
     alteracao = true;
@@ -149,7 +155,7 @@ void OLED::rodaTela(){
         roda1.reset();
         roda2.reset();
         //debounce
-        wait(0.05);
+        //wait(0.05);
     }
 }
 
@@ -487,13 +493,13 @@ void OLED::rodaTelaFreqPot(void){
     gOled2.printf("Freq: ");
     if(freq < 1000){
         gOled2.setTextSize(2);
-        gOled2.printf("%d", int(freq/1000));
+        gOled2.printf("%d", int(freq));
         gOled2.setTextSize(1);
         gOled2.printf("Hz");
     }
     else{
         gOled2.setTextSize(2);
-        gOled2.printf("%d.%d", int(freq/1000), (int(freq) % 1000) / 10);
+        gOled2.printf("%d.%02d", int(freq/1000), (int(freq) % 1000) / 10);
         
         gOled2.setTextSize(1);
         gOled2.printf("kHz");
@@ -505,7 +511,7 @@ void OLED::rodaTelaFreqPot(void){
     gOled2.setTextSize(2);
     gOled2.printf("%d.%d", int(pot/1000), (int(pot) % 1000) / 100);
     gOled2.setTextSize(1);
-    gOled2.printf("dB");
+    gOled2.printf("dBx");
     
     gOled2.drawFastHLine(0, 55, 128, 1);
     gOled2.drawFastVLine(126, 56, 8, 1);
@@ -562,26 +568,26 @@ void OLED::rodaTelaFFT(void){
     gOled2.setTextColor(0, 1);
     if(click){
         switch(optionSelectFFT){
-            case 0: gOled2.printf("150Hz       EDIT MODE"); break;
-            case 1: gOled2.printf("300Hz       EDIT MODE"); break;
-            case 2: gOled2.printf("450Hz       EDIT MODE"); break;
-            case 3: gOled2.printf("600Hz       EDIT MODE"); break;
-            case 4: gOled2.printf("900Hz       EDIT MODE"); break;
-            case 5: gOled2.printf("1.2kHz      EDIT MODE"); break;
-            case 6: gOled2.printf("1.8kHz      EDIT MODE"); break;
-            case 7: gOled2.printf("2.4kHz      EDIT MODE"); break;
-            case 8: gOled2.printf("3.0kHz      EDIT MODE"); break;
+            case 0: gOled2.printf("119Hz       EDIT MODE"); break;
+            case 1: gOled2.printf("238Hz       EDIT MODE"); break;
+            case 2: gOled2.printf("357Hz       EDIT MODE"); break;
+            case 3: gOled2.printf("476Hz       EDIT MODE"); break;
+            case 4: gOled2.printf("715Hz       EDIT MODE"); break;
+            case 5: gOled2.printf("953Hz       EDIT MODE"); break;
+            case 6: gOled2.printf("1.3kHz      EDIT MODE"); break;
+            case 7: gOled2.printf("1.7kHz      EDIT MODE"); break;
+            case 8: gOled2.printf("2.3kHz      EDIT MODE"); break;
             case 9: gOled2.printf("3.6kHz      EDIT MODE"); break;
-            case 10: gOled2.printf("4.8kHz      EDIT MODE"); break;
-            case 11: gOled2.printf("6.0kHz      EDIT MODE"); break;
-            case 12: gOled2.printf("8.4kHz      EDIT MODE"); break;
-            case 13: gOled2.printf("10.8kHz     EDIT MODE"); break;
-            case 14: gOled2.printf("15.6kHz     EDIT MODE"); break;
-            case 15: gOled2.printf("20.4kHz     EDIT MODE"); break;
+            case 10: gOled2.printf("5.0kHz      EDIT MODE"); break;
+            case 11: gOled2.printf("7.5kHz      EDIT MODE"); break;
+            case 12: gOled2.printf("10.0kHz     EDIT MODE"); break;
+            case 13: gOled2.printf("13.1kHz     EDIT MODE"); break;
+            case 14: gOled2.printf("18.1kHz     EDIT MODE"); break;
+            case 15: gOled2.printf("25.0kHz     EDIT MODE"); break;
         }
         for(int i = 0; i < 16; i++){
             filtroHeight[i] = 64 * 0.70 * (*(filtro + i));
-            valorHeight[i] = 64 * 0.70 * fftOut[i] * (*(filtro + i)) / maxValue;
+            valorHeight[i] = 64 * 0.70 * fftOut[i]/* * (*(filtro + i)) *// maxValue;
             gOled2.drawFastVLine(i*8+3, view + 1, 8, 1);
             if(int(valorHeight[i]) == 0)
                 valorHeight[i] = 1;
@@ -596,7 +602,7 @@ void OLED::rodaTelaFFT(void){
         gOled2.printf("<-EXIT      VIEW MODE");
         for(int i = 0; i < 16; i++){
             filtroHeight[i] = 64 * 0.80 * (*(filtro + i));
-            valorHeight[i] = 64 * 0.80 * fftOut[i] * (*(filtro + i)) / maxValue;
+            valorHeight[i] = 64 * 0.80 * fftOut[i]/* * (*(filtro + i)) *// maxValue;
             if(int(valorHeight[i]) == 0)
                 valorHeight[i] = 1;
             if(int(filtroHeight[i]) == 0)
@@ -781,7 +787,7 @@ void OLED::rodaTelaCreditos(void){
     gOled2.setTextCursor(25, 42);
     gOled2.printf("Bruno S Chang\n");
     gOled2.setTextCursor(25, 56);
-    gOled2.printf("Hermes Irineu\n");
+    gOled2.printf("Hermes Monego\n");
     
     //resetar variaveis
     sentido1 = 0;

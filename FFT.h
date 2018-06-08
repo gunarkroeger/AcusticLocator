@@ -11,11 +11,8 @@ class FFT {
 public:
     FFT();
     virtual ~FFT();
-    
-   float32_t output[CAPTURE_LENGTH];
-	float filter[16];
-   
-   void CalculateFFT(SignalBuf &buf, unsigned ch);
+       
+   	void CalculateFFT(SignalBuf &buf, unsigned c);
     //void CalculateFFT ();
    
    OLED *oled;

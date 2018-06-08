@@ -13,7 +13,7 @@
 //------------------------------------------------------------------------------
 enum { ADC_ACQ_LENGHT = 2 * ADC_LENGTH * 1};
 enum { ADC_MEAN_SIZE = 1024 };
-enum { THRESHOLD = 50 };
+enum { THRESHOLD = 100 };
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -145,27 +145,31 @@ int main()
 		{
 			//wait for full capture
 			refreshDisp();
-			wait(0.02f);
+			wait(0.05f);
 		}
 		
 		NVIC_DisableIRQ(DMA1_Channel1_IRQn);
 				
 		printf("Signals:\n");
-		for(unsigned t = 0; t < processQueue.size(); t++) //process captured signal
+		for(unsigned t = 0; t < processQueue.size(); t++)
 		{
-			
-			//serial debug sample
 			for(unsigned i = 0; i < ADC_LENGTH; i++)
 				pc.printf("%i,", int(processQueue[t][i]));
 			pc.printf("\n");
 		}
+		
+		//calculate FFT, filter data and display fft for channel 0
 		fft.CalculateFFT(processQueue, 0);
-    	//setFFT(float fftOut[16], float maxValue, float &filtro);
-	
-		Signal t = {23 * SAMPLE_TIME,36 * SAMPLE_TIME,12 * SAMPLE_TIME,28 * SAMPLE_TIME,0 * SAMPLE_TIME};
 		
-		//multilat.GetPosition(t);
+		printf("Filtered:\n");
+		for(unsigned t = 0; t < processQueue.size(); t++)
+		{
+			for(unsigned i = 0; i < ADC_LENGTH; i++)
+				pc.printf("%i,", int(processQueue[t][i]));
+			pc.printf("\n");
+		}
 		
+		Signal t;		
 					
 		t[0] = 0; //get delays in relation to channel 0
 		t[1] = crosscorrel.GetDelay(processQueue, 0, 1);

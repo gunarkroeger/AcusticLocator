@@ -4,7 +4,7 @@
 enum { ADC_LENGTH = 5 };
 enum { DIMENSIONS = 3 };
 #define SPEED_OF_SOUND 340
-#define SAMPLE_TIME 0.000013f
+#define SAMPLE_TIME 0.0000163397//0.000013f
 
 enum { CAPTURE_LENGTH = 512}; //6.64ms
 
@@ -22,23 +22,23 @@ typedef struct Pos {
 
 #define FFT_MAX_DISPLAY 20000
 const unsigned fftLogIndex[] = {
-0  ,
-1  ,
-2  ,
-3  ,
-5  ,
-7  ,
-9  ,
-13 ,
-17 ,
-21 ,
-27 ,
-35 ,
-47 ,
-63 ,
-87 ,
-120,
-256,
+	1  ,
+	2  ,
+	3  ,
+	4  ,
+	6  ,
+	8  ,
+	10 ,
+	13 ,
+	16 ,
+	26 ,
+	37 ,
+	51 ,
+	72 ,
+	98 ,
+	131,
+	168,
+	256,
 };
 
 const float aproxAngle2d[]

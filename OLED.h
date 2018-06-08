@@ -31,6 +31,7 @@ public:
     void setThreshold(int &threshold);
     
     void rodaTela(void);
+	float getFilter(unsigned i);
     
 private:
 //------------------------------FUNCOES-----------------------------------------
