@@ -22,7 +22,7 @@ enum { THRESHOLD = 100 };
 DigitalOut led1(LED1);
 
 
-OLED oled(D14, D15, D8, D7, D9, D5, D4, D3);
+OLED oled(D14, D15, PC_11, PD_2, D3, D5, D4, D6);
 FFT fft;
 
 Serial pc(USBTX, USBRX);
@@ -36,6 +36,7 @@ AnalogIn a4(A4);
 int threshold = THRESHOLD;
 //------------------------------------------------------------------------------
 Timer timer;
+Thread dispThread;
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -59,7 +60,11 @@ Signal adcUnbiasedValue;
 
 void refreshDisp()
 {
-	oled.rodaTela();
+	while(1)
+	{
+		oled.rodaTela();
+		wait(0.05f);
+	}
 }
 void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 {
@@ -119,9 +124,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 // main() runs in its own thread in the OS
 int main()
 {
-	pc.baud(1000000);
-	//pc.attach(&serialInterruptTx, Serial::TxIrq);
-	
+	pc.baud(1000000);	
 	timer.start();
 	
 	if(!adc.init())
@@ -132,9 +135,7 @@ int main()
 	Crosscorrel crosscorrel;
 	Multilat multilat;
 	fft.oled = &oled;
-   	//.setX();
-   	//oled.setFreqPot(float freq, float pot);
-   	//oled.setC(int c);
+	dispThread.start(&refreshDisp);
 	
    	oled.setThreshold(threshold);
 	
@@ -143,13 +144,12 @@ int main()
 		a++;
 		while(!captureReady)
 		{
-			//wait for full capture
-			refreshDisp();
-			wait(0.05f);
+			
 		}
 		
 		NVIC_DisableIRQ(DMA1_Channel1_IRQn);
-				
+		
+#ifdef DEBUG_PRINT
 		printf("Signals:\n");
 		for(unsigned t = 0; t < processQueue.size(); t++)
 		{
@@ -157,10 +157,12 @@ int main()
 				pc.printf("%i,", int(processQueue[t][i]));
 			pc.printf("\n");
 		}
+#endif
 		
 		//calculate FFT, filter data and display fft for channel 0
 		fft.CalculateFFT(processQueue, 0);
 		
+//#ifdef DEBUG_PRINT
 		printf("Filtered:\n");
 		for(unsigned t = 0; t < processQueue.size(); t++)
 		{
@@ -168,6 +170,7 @@ int main()
 				pc.printf("%i,", int(processQueue[t][i]));
 			pc.printf("\n");
 		}
+//#endif
 		
 		Signal t;		
 					
@@ -187,21 +190,25 @@ int main()
 			}	
 		
    		oled.setC(c);
-		
+
+#ifdef DEBUG_PRINT		
 		for(unsigned i = 0; i < ADC_LENGTH; i++)
 			printf("crosscorrel[0,%d]: %i\n", i, int(t[i]));
-		
+#endif		
 		Pos X = multilat.GetPosition(t);
 		
 		float Y[3] = {X[0]*1000-8, X[1]*1000+39, X[2]*1000 -85};
 		oled.setX(Y);
+
+#ifdef DEBUG_PRINT
 		pc.printf("Threshold = %i\n", threshold);
 		pc.printf("\n\n");
+#endif
 		
 		processQueue.clear();
 		captureReady = false;
+		//refreshDisp();
 		NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-		refreshDisp();
     }
 }
 

@@ -20,6 +20,7 @@ typedef struct Pos {
 	float axis[DIMENSIONS];
 } Pos;
 
+#define DEBUG_PRINT
 #define FFT_MAX_DISPLAY 20000
 const unsigned fftLogIndex[] = {
 	1  ,

@@ -45,12 +45,15 @@ void FFT::CalculateFFT(SignalBuf &buf, unsigned c)
 		if(ch == c) //show on oled
 		{
 			arm_cmplx_mag_f32(input, output, CAPTURE_LENGTH);
-			/*printf("FFT[%d]: \n", ch); 
+			
+#ifdef DEBUG_PRINT
+			printf("FFT[%d]: \n", ch); 
 			for (int i = 0; i < CAPTURE_LENGTH/2; i++) //print only one half
 			{
 				printf("%i\n",(int)output[i]);        
 			}
-			printf("end FFT\n");*/
+			printf("end FFT\n");
+#endif
 			float maxValue = 0;
 			unsigned maxIndex = 0;
 			arm_max_f32(output, CAPTURE_LENGTH, &maxValue, &maxIndex);

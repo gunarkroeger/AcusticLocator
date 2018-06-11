@@ -122,10 +122,10 @@ void OLED::rodaTela(){
             //telaExit
                 rodaTelaExit();
                 break;
-//            case creditos:
-//            //telaCreditos
-//                rodaTelaCreditos();
-//                break;
+            case creditos:
+            //telaCreditos
+                rodaTelaCreditos();
+                break;
             case debug:
             //TelaDebug
                 rodaTelaDebug();
@@ -136,18 +136,18 @@ void OLED::rodaTela(){
     else{
         alteracao = true;
         if(roda1.getPulses() > 0){
-            sentido1--;
+            sentido1 += roda1.getPulses();
         }
         else if(roda1.getPulses() < 0){
-            sentido1++;
+            sentido1 += roda1.getPulses();
         }
         else if(roda2.getPulses() > 0){
-            sentido2--;
+            sentido2 += roda2.getPulses();
         }
         else if(roda2.getPulses() < 0){
-            sentido2++;
+            sentido2 += roda2.getPulses();
         }
-        else if(roda1.getRevolutions() != 0/* || roda2.getRevolutions() != 0*/){
+        else if(roda1.getRevolutions() != 0 || roda2.getRevolutions() != 0){
             click = !click;
         }
         else
@@ -206,28 +206,28 @@ void OLED::rodaTelaMenu(void){
     gOled2.printf(" FFT ");
     
     //opcao Debug
-    if(optionSelect == 2){
-        gOled2.setTextColor(0, 1);
-        gOled2.drawFastHLine(18, 51, 42, 1);
-        if(click)
-            estadoDaTela = debug;
-    }
-    else
-        gOled2.setTextColor(1);
-    gOled2.setTextCursor(18, 52);
-    gOled2.printf(" Debug ");
-    
-//    opcao Creditos
 //    if(optionSelect == 2){
 //        gOled2.setTextColor(0, 1);
-//        gOled2.drawFastHLine(18, 51, 60, 1);
+//        gOled2.drawFastHLine(18, 51, 42, 1);
 //        if(click)
-//            estadoDaTela = creditos;
+//            estadoDaTela = debug;
 //    }
 //    else
 //        gOled2.setTextColor(1);
 //    gOled2.setTextCursor(18, 52);
-//    gOled2.printf(" Creditos ");
+//    gOled2.printf(" Debug ");
+    
+//    opcao Creditos
+    if(optionSelect == 2){
+        gOled2.setTextColor(0, 1);
+        gOled2.drawFastHLine(18, 51, 60, 1);
+        if(click)
+            estadoDaTela = creditos;
+    }
+    else
+        gOled2.setTextColor(1);
+    gOled2.setTextCursor(18, 52);
+    gOled2.printf(" Creditos ");
     
     //resetar variaveis
     sentido1 = 0;

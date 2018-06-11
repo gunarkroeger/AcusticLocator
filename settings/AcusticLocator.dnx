@@ -9,7 +9,7 @@
         <stlinkResetStrategy>1</stlinkResetStrategy>
     </StLinkDriver>
     <DebugChecksum>
-        <Checksum>4110011119</Checksum>
+        <Checksum>1160444589</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -19,15 +19,15 @@
         <Enabled>_ 0</Enabled>
     </CodeCoverage>
     <Stack>
-        <UseTrigger>1</UseTrigger>
-        <TriggerName>main</TriggerName>
-        <LimitSize>0</LimitSize>
-        <ByteLimit>50</ByteLimit>
         <FillEnabled>1</FillEnabled>
         <OverflowWarningsEnabled>1</OverflowWarningsEnabled>
         <WarningThreshold>90</WarningThreshold>
         <SpWarningsEnabled>1</SpWarningsEnabled>
         <WarnLogOnly>1</WarnLogOnly>
+        <UseTrigger>1</UseTrigger>
+        <TriggerName>main</TriggerName>
+        <LimitSize>0</LimitSize>
+        <ByteLimit>50</ByteLimit>
     </Stack>
     <Disassembly>
         <MixedMode>1</MixedMode>
@@ -57,9 +57,6 @@
     <InterruptStripe>
         <Sort>1</Sort>
     </InterruptStripe>
-    <DisassembleMode>
-        <mode>0</mode>
-    </DisassembleMode>
     <Trace2>
         <Enabled>0</Enabled>
         <ShowSource>0</ShowSource>
@@ -105,6 +102,9 @@
         <ShowTimeSum>1</ShowTimeSum>
         <SumSortOrder>0</SumSortOrder>
     </EventLog>
+    <DisassembleMode>
+        <mode>0</mode>
+    </DisassembleMode>
     <Breakpoints2>
         <Count>0</Count>
     </Breakpoints2>
