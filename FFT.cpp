@@ -68,8 +68,8 @@ void FFT::CalculateFFT(SignalBuf &buf, unsigned c)
 			}
 			
 			for(unsigned i = 0; i < 16; i++) //limit output
-				if(fftOut[i] > FFT_MAX_DISPLAY)
-					fftOut[i] = FFT_MAX_DISPLAY;
+				if(fftOut[i] > FFT_MAX_DISPLAY * oled->getFilter(i))
+					fftOut[i] = FFT_MAX_DISPLAY * oled->getFilter(i);
 			oled->setFreqPot(float(maxIndex)/(SAMPLE_TIME*CAPTURE_LENGTH), power);
 			oled->setFFT(fftOut, FFT_MAX_DISPLAY);
 		}

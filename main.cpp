@@ -49,6 +49,7 @@ vector<Signal> processQueue;
 
 int a = 0, b = 0;
 
+unsigned processTime = 0;
 unsigned adcTime = 0;
 unsigned stayActive = 0;
 
@@ -57,6 +58,8 @@ volatile bool captureReady = false;
 Signal adcValue;
 Signal adcMeanValue;
 Signal adcUnbiasedValue;
+
+Pos X;
 
 void refreshDisp()
 {
@@ -74,7 +77,6 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 	//timer.reset();
 	if(processQueue.size() < CAPTURE_LENGTH)
 	{
-		led1 = 0;
 		for(unsigned i = 0; i < length; i+= ADC_LENGTH)
 		{
 			for(unsigned ch = 0; ch < ADC_LENGTH; ch++)
@@ -94,14 +96,13 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 			
 			if(stayActive)
 			{
-				if(processQueue.size() == 0)
-					timer.reset();
+				//if(processQueue.size() == 0)
+					//timer.reset();
 				processQueue.push_back(adcUnbiasedValue);
 			}
 		}
 	}
 	else {
-		adcTime = timer.read_us();
 		captureReady = true;
 		stayActive = false;
 	}
@@ -146,9 +147,10 @@ int main()
 		{
 			
 		}
-		
+		led1 = 1;
 		NVIC_DisableIRQ(DMA1_Channel1_IRQn);
 		
+		timer.reset();
 #ifdef DEBUG_PRINT
 		printf("Signals:\n");
 		for(unsigned t = 0; t < processQueue.size(); t++)
@@ -162,7 +164,7 @@ int main()
 		//calculate FFT, filter data and display fft for channel 0
 		fft.CalculateFFT(processQueue, 0);
 		
-//#ifdef DEBUG_PRINT
+#ifdef DEBUG_PRINT
 		printf("Filtered:\n");
 		for(unsigned t = 0; t < processQueue.size(); t++)
 		{
@@ -170,7 +172,7 @@ int main()
 				pc.printf("%i,", int(processQueue[t][i]));
 			pc.printf("\n");
 		}
-//#endif
+#endif
 		
 		Signal t;		
 					
@@ -195,17 +197,26 @@ int main()
 		for(unsigned i = 0; i < ADC_LENGTH; i++)
 			printf("crosscorrel[0,%d]: %i\n", i, int(t[i]));
 #endif		
-		Pos X = multilat.GetPosition(t);
+		Pos newX = multilat.GetPosition(t);
 		
-		float Y[3] = {X[0]*1000-8, X[1]*1000+39, X[2]*1000 -85};
-		oled.setX(Y);
+		if(!isnan(newX[0]) && !isnan(newX[1]) && !isnan(newX[2]))
+		{
+			
+			X[0] += (newX[0] - X[0]) / 10;
+			X[1] += (newX[1] - X[1]) / 10;
+			X[2] += (newX[2] - X[2]) / 10;
+			
+			float Y[3] = {X[0]*1000-8, X[1]*1000+39, X[2]*1000 -85};
+			oled.setX(Y);
+		}
 
 #ifdef DEBUG_PRINT
 		pc.printf("Threshold = %i\n", threshold);
 		pc.printf("\n\n");
 #endif
-		
 		processQueue.clear();
+		processTime = timer.read_us();
+		led1 = 0;
 		captureReady = false;
 		//refreshDisp();
 		NVIC_EnableIRQ(DMA1_Channel1_IRQn);
