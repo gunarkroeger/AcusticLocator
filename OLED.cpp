@@ -571,19 +571,19 @@ void OLED::rodaTelaFFT(void){
             case 0: gOled2.printf("119Hz       EDIT MODE"); break;
             case 1: gOled2.printf("238Hz       EDIT MODE"); break;
             case 2: gOled2.printf("357Hz       EDIT MODE"); break;
-            case 3: gOled2.printf("476Hz       EDIT MODE"); break;
-            case 4: gOled2.printf("715Hz       EDIT MODE"); break;
-            case 5: gOled2.printf("953Hz       EDIT MODE"); break;
+            case 3: gOled2.printf("536Hz       EDIT MODE"); break;
+            case 4: gOled2.printf("774Hz       EDIT MODE"); break;
+            case 5: gOled2.printf("1.0kHz      EDIT MODE"); break;
             case 6: gOled2.printf("1.3kHz      EDIT MODE"); break;
             case 7: gOled2.printf("1.7kHz      EDIT MODE"); break;
-            case 8: gOled2.printf("2.3kHz      EDIT MODE"); break;
-            case 9: gOled2.printf("3.6kHz      EDIT MODE"); break;
-            case 10: gOled2.printf("5.0kHz      EDIT MODE"); break;
-            case 11: gOled2.printf("7.5kHz      EDIT MODE"); break;
+            case 8: gOled2.printf("2.4kHz      EDIT MODE"); break;
+            case 9: gOled2.printf("3.7kHz      EDIT MODE"); break;
+            case 10: gOled2.printf("5.2kHz      EDIT MODE"); break;
+            case 11: gOled2.printf("7.3kHz      EDIT MODE"); break;
             case 12: gOled2.printf("10.0kHz     EDIT MODE"); break;
-            case 13: gOled2.printf("13.1kHz     EDIT MODE"); break;
-            case 14: gOled2.printf("18.1kHz     EDIT MODE"); break;
-            case 15: gOled2.printf("25.0kHz     EDIT MODE"); break;
+            case 13: gOled2.printf("13.6kHz     EDIT MODE"); break;
+            case 14: gOled2.printf("17.7kHz     EDIT MODE"); break;
+            case 15: gOled2.printf("25.3kHz     EDIT MODE"); break;
         }
         for(int i = 0; i < 16; i++){
             filtroHeight[i] = 64 * 0.70 * (*(filtro + i));

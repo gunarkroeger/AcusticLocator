@@ -5,6 +5,7 @@ enum { ADC_LENGTH = 5 };
 enum { DIMENSIONS = 3 };
 #define SPEED_OF_SOUND 340
 #define SAMPLE_TIME 0.0000163397//0.000013f
+#define	MEAN_SIZE	6
 
 enum { CAPTURE_LENGTH = 512}; //6.64ms
 
@@ -21,7 +22,7 @@ typedef struct Pos {
 } Pos;
 
 //#define DEBUG_PRINT
-#define FFT_MAX_DISPLAY 20000
+#define FFT_MAX_DISPLAY 10000
 const unsigned fftLogIndex[] = {
 	1  ,
 	2  ,

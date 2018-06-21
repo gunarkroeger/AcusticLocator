@@ -65,6 +65,7 @@ void FFT::CalculateFFT(SignalBuf &buf, unsigned c)
 				for(unsigned j = fftLogIndex[i]; j < fftLogIndex[i+1]; j++)
 					fftOut[i] += output[j];
 				power += fftOut[i];
+				fftOut[i] /= fftLogIndex[i+1] - fftLogIndex[i];
 			}
 			
 			for(unsigned i = 0; i < 16; i++) //limit output

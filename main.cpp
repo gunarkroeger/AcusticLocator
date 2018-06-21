@@ -59,7 +59,7 @@ Signal adcValue;
 Signal adcMeanValue;
 Signal adcUnbiasedValue;
 
-Pos X;
+vector<Pos> posBuffer;
 
 void refreshDisp()
 {
@@ -198,13 +198,23 @@ int main()
 			printf("crosscorrel[0,%d]: %i\n", i, int(t[i]));
 #endif		
 		Pos newX = multilat.GetPosition(t);
-		
+		Pos X;
 		if(!isnan(newX[0]) && !isnan(newX[1]) && !isnan(newX[2]))
 		{
+			posBuffer.push_back(newX);
+			for(unsigned i = 0; i < posBuffer.size(); i++)
+			{
+				X[0] += posBuffer[i][0];
+				X[1] += posBuffer[i][1];
+				X[2] += posBuffer[i][2];
+			}
 			
-			X[0] += (newX[0] - X[0]) / 10;
-			X[1] += (newX[1] - X[1]) / 10;
-			X[2] += (newX[2] - X[2]) / 10;
+			X[0] /= posBuffer.size();
+			X[1] /= posBuffer.size();
+			X[2] /= posBuffer.size();
+			
+			if(posBuffer.size() >= MEAN_SIZE)
+				posBuffer.erase(posBuffer.begin());
 			
 			float Y[3] = {X[0]*1000-8, X[1]*1000+39, X[2]*1000 -85};
 			oled.setX(Y);
