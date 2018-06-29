@@ -9,7 +9,7 @@
         <stlinkResetStrategy>1</stlinkResetStrategy>
     </StLinkDriver>
     <DebugChecksum>
-        <Checksum>1610815526</Checksum>
+        <Checksum>3125123768</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -37,10 +37,6 @@
         <ShowArgs>0</ShowArgs>
     </CallStack>
     <SWOTraceHWSettings>
-        <PcSampCYCTAP>1</PcSampCYCTAP>
-        <PcSampPOSTCNT>15</PcSampPOSTCNT>
-        <PcSampIndex>0</PcSampIndex>
-        <DataLogMode>0</DataLogMode>
         <OverrideDefaultClocks>0</OverrideDefaultClocks>
         <CpuClock>80000000</CpuClock>
         <ClockAutoDetect>0</ClockAutoDetect>
@@ -49,6 +45,10 @@
         <Prescaler>40</Prescaler>
         <TimeStampPrescIndex>0</TimeStampPrescIndex>
         <TimeStampPrescData>0</TimeStampPrescData>
+        <PcSampCYCTAP>1</PcSampCYCTAP>
+        <PcSampPOSTCNT>15</PcSampPOSTCNT>
+        <PcSampIndex>0</PcSampIndex>
+        <DataLogMode>0</DataLogMode>
         <ITMportsEnable>0</ITMportsEnable>
         <ITMportsTermIO>0</ITMportsTermIO>
         <ITMportsLogFile>0</ITMportsLogFile>
@@ -57,18 +57,13 @@
     <InterruptStripe>
         <Sort>1</Sort>
     </InterruptStripe>
-    <Breakpoints2>
-        <Count>0</Count>
-    </Breakpoints2>
-    <LogFile>
-        <LoggingEnabled>_ 0</LoggingEnabled>
-        <LogFile>_ ""</LogFile>
-        <Category>_ 0</Category>
-    </LogFile>
-    <TermIOLog>
-        <LoggingEnabled>_ 0</LoggingEnabled>
-        <LogFile>_ ""</LogFile>
-    </TermIOLog>
+    <DataLog>
+        <LogEnabled>0</LogEnabled>
+        <GraphEnabled>0</GraphEnabled>
+        <ShowTimeLog>1</ShowTimeLog>
+        <SumEnabled>0</SumEnabled>
+        <ShowTimeSum>1</ShowTimeSum>
+    </DataLog>
     <Trace2>
         <Enabled>0</Enabled>
         <ShowSource>0</ShowSource>
@@ -80,13 +75,7 @@
         <EventCPI>0</EventCPI>
         <EventEXC>0</EventEXC>
         <EventFOLD>0</EventFOLD>
-        <EventLSU>0</EventLSU>
-        <EventSLEEP>0</EventSLEEP>
     </SWOTraceWindow>
-    <DataLog>
-        <LogEnabled>0</LogEnabled>
-        <ShowTimeSum>1</ShowTimeSum>
-    </DataLog>
     <InterruptLog>
         <LogEnabled>0</LogEnabled>
         <GraphEnabled>0</GraphEnabled>
@@ -100,10 +89,6 @@
         <Symbol_0>0 0 1</Symbol_0>
         <Title_1>Ch2</Title_1>
         <Symbol_1>0 0 1</Symbol_1>
-        <Title_2>Ch1</Title_2>
-        <Symbol_2>0 0 1</Symbol_2>
-        <Title_3>Ch0</Title_3>
-        <Symbol_3>0 0 1</Symbol_3>
         <LogEnabled>0</LogEnabled>
         <GraphEnabled>0</GraphEnabled>
         <ShowTimeLog>1</ShowTimeLog>
@@ -111,6 +96,21 @@
         <ShowTimeSum>1</ShowTimeSum>
         <SumSortOrder>0</SumSortOrder>
     </EventLog>
+    <DisassembleMode>
+        <mode>0</mode>
+    </DisassembleMode>
+    <Breakpoints2>
+        <Count>0</Count>
+    </Breakpoints2>
+    <LogFile>
+        <LoggingEnabled>_ 0</LoggingEnabled>
+        <LogFile>_ ""</LogFile>
+        <Category>_ 0</Category>
+    </LogFile>
+    <TermIOLog>
+        <LoggingEnabled>_ 0</LoggingEnabled>
+        <LogFile>_ ""</LogFile>
+    </TermIOLog>
     <Aliases>
         <Count>0</Count>
         <SuppressDialog>0</SuppressDialog>

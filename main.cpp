@@ -61,6 +61,8 @@ Signal adcUnbiasedValue;
 
 vector<Pos> posBuffer;
 
+Timer idleTimer;
+
 void refreshDisp()
 {
 	while(1)
@@ -99,6 +101,11 @@ void ProcessAdc(ADC_HandleTypeDef* AdcHandle, unsigned offset, unsigned length)
 				//if(processQueue.size() == 0)
 					//timer.reset();
 				processQueue.push_back(adcUnbiasedValue);
+				idleTimer.reset();
+			}
+			else if(idleTimer.read_ms() > 1000)
+			{
+				posBuffer.clear();	
 			}
 		}
 	}
@@ -127,6 +134,7 @@ int main()
 {
 	pc.baud(1000000);	
 	timer.start();
+	idleTimer.start();
 	
 	if(!adc.init())
 		_Error_Handler(__FILE__, __LINE__);
